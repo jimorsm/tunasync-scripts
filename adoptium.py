@@ -58,7 +58,7 @@ def check_file(dest_filename: Path, pkg_checksum: str, size: int)->bool:
     return True
 
 def download_release(ver: int, jvm_impl: str, alive_files: Set[str]):
-    r = requests.get(f"https://api.adoptopenjdk.net/v3/assets/latest/{ver}/{jvm_impl}", timeout=(5, 10))
+    r = requests.get(f"https://api.adoptium.net/v3/assets/latest/{ver}/{jvm_impl}", timeout=(5, 10), headers={ 'User-Agent': 'TUNASYNC-SCRIPTS' })
     r.raise_for_status()
     rel_list = r.json()
     rel_path = Path(BASE_PATH) / str(ver)
@@ -102,8 +102,7 @@ if __name__ == "__main__":
     # =================== standalone ==========================
     for v in FEATURE_VERSIONS:
         filelist = set()
-        for jvm in ('hotspot', 'openj9'):
-            download_release(v, jvm, filelist)
+        download_release(v, 'hotspot', filelist)
         delete_old_files(v, filelist)
     # =================== APT repos ==========================
     # "$apt_sync" --delete "${BASE_URL}/deb" @ubuntu-lts,@debian-current main amd64,armhf,arm64 "$BASE_PATH/deb"
